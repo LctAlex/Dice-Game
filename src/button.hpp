@@ -11,4 +11,5 @@ class Button
     ~Button();
     void Draw();
     bool isPressed();
+    bool mouseOver();
 };

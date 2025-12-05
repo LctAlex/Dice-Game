@@ -1,6 +1,6 @@
 #include "button.hpp"
 
-Button::Button(const char* imagePath, Vector2 imagePos, float scale)
+Button::Button(const char* imagePath, Vector2 imagePos, float scale) //yeah so the scale was put here so we don't make extra variables for our class, we scale the texture before we get it
 {
     Image image = LoadImage(imagePath); //kinda like Sprite in SFML
     int originalWidth = image.width;
@@ -19,6 +19,7 @@ Button::~Button()
 }
 void Button::Draw()
 {
+    if(mouseOver()) DrawRectangleV(position, (Vector2){texture.width + 5.f, texture.height + 5.f}, WHITE);
     DrawTextureV(texture, position, WHITE);
 }
 bool Button::isPressed()
@@ -30,6 +31,14 @@ bool Button::isPressed()
         return true;
     }
     else return false;
+}
+bool Button::mouseOver()
+{
+    Rectangle rect = {position.x, position.y, static_cast<float>(texture.width), static_cast<float>(texture.height)};
 
-    
+    if(CheckCollisionPointRec(GetMousePosition(), rect))
+    {
+        return true;
+    }
+    else return false;
 }
