@@ -6,6 +6,8 @@
 #include "button.hpp"
 #include "animated_button.hpp"
 
+#include "sprite.hpp"
+
 int main()
 {
    // SetConfigFlags(FLAG_FULLSCREEN_MODE);
@@ -15,12 +17,13 @@ int main()
     camera2d.zoom = 1.0f; //Crucial
     
     Texture2D background = LoadTexture("assets/menu.png");
-    SetTextureFilter(background, TEXTURE_FILTER_BILINEAR);
-
-    Button button1("assets/menu.png", {300, 300}, 0.5f);
+    //SetTextureFilter(background, TEXTURE_FILTER_BILINEAR);
 
     AButton button2("assets/leaf.png", (Vector2){static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, {256, 256}, 1.0f);
     button2.setOriginLowerRight();
+
+    Sprite sprite("assets/dice.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 1.f, {256, 256});
+    sprite.SetRow(1);
 
     while(!WindowShouldClose())
     {
@@ -36,10 +39,12 @@ int main()
             (Vector2){0, 0},
             0.0f, WHITE);
 
-        button1.Draw();
-
         button2.Update();
         button2.Draw();
+        //DrawText("Bia", 300, 300, 20, RED);
+        sprite.Draw();
+        sprite.AnimateRow(0.05f, 6);
+        sprite.Rotate(0.15f, 15);
         EndMode2D();
 
         EndDrawing();
