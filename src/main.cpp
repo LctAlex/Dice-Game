@@ -5,6 +5,7 @@
 #include <iostream>
 #include "button.hpp"
 #include "animated_button.hpp"
+#include "dice.hpp"
 
 #include "sprite.hpp"
 
@@ -22,15 +23,21 @@ int main()
     AButton button2("assets/leaf.png", (Vector2){static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, {256, 256}, 1.0f);
     button2.setOriginLowerRight();
 
-    Sprite sprite("assets/dice.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 1.f, {256, 256});
+    Sprite sprite("assets/dice6.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, .5f, {256, 256});
     sprite.SetRow(1);
 
+    Dice dice("assets/dice6.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 1.0f, {256, 256}, {0.1f, 0.1f}, 0.15f, 0.15f, 0.5f, 6);
+    dice.SetRow(1);
+
+    int chosenVal = -1;
+    float timer = 0.0f;
     while(!WindowShouldClose())
     {
         if(IsKeyPressed(KEY_ESCAPE)) break;
+        if(IsKeyPressed(KEY_ENTER)) {chosenVal = -1; timer = 0.0f; sprite.SetRow(1); dice.SetRow(1);}
 
         BeginDrawing();
-        ClearBackground(BLUE);
+        ClearBackground(WHITE);
 
         BeginMode2D(camera2d);
         DrawTexturePro(background,
@@ -42,9 +49,35 @@ int main()
         button2.Update();
         button2.Draw();
         //DrawText("Bia", 300, 300, 20, RED);
+        if(chosenVal == -1)
+        {
+            timer += GetFrameTime();
+
+            if(timer > 2.f)
+            {
+                // sprite.SetRow(0);
+                // sprite.SetColumn(chosenVal);
+                // std::cout << chosenVal;
+                dice.SetRow(0);
+                chosenVal = GetRandomValue(0, 5);
+                dice.SetColumn(chosenVal);
+                std::cout << chosenVal;
+            }
+            else
+            {
+                // sprite.AnimateRow(0.05f, 6);
+                // sprite.Rotate(0.15f, 15);
+                // sprite.AnimateRow(0.05f, 6);
+                dice.Rotate(0.15f, 15);
+                dice.AnimateRow(0.05f, 6);
+            }
+        }
         sprite.Draw();
-        sprite.AnimateRow(0.05f, 6);
-        sprite.Rotate(0.15f, 15);
+        dice.Draw();
+
+        // DrawLine(0, GetScreenHeight()/2, GetScreenWidth(), GetScreenHeight()/2, BLUE);
+        // DrawLine(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), RED);
+
         EndMode2D();
 
         EndDrawing();

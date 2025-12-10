@@ -4,7 +4,7 @@
 
 class Sprite
 {
-    private:
+    protected: //protected so I cam use them inside other classes
     Texture texture;
     Vector2 pixelSize;
     float passedTime;
@@ -35,9 +35,9 @@ class Sprite
     void Draw()
     {                      //vvv Column * width vvv  vvv Row * height vvv
         Rectangle source = {colIndex * pixelSize.x, rowIndex * pixelSize.y, pixelSize.x, pixelSize.y}; //start on the spritesheet's x and y ; size of the pixels on spritesheet
-        Rectangle dest = {position.x, position.y, pixelSize.x, pixelSize.y}; //position on the screen, final size (obtained inside constructor)
+        Rectangle dest = {position.x, position.y, pixelSize.x * scale, pixelSize.y * scale}; //position on the screen, final size (obtained inside constructor)
 
-        DrawTexturePro(texture, source, dest, {pixelSize.x/2, pixelSize.y/2}, rotation, WHITE);
+        DrawTexturePro(texture, source, dest, {pixelSize.x * scale/2, pixelSize.y * scale/2}, rotation, WHITE);
     }
     void SetRow(int row)
     {
@@ -49,7 +49,6 @@ class Sprite
     }
     void AnimateRow(float speed, int colNum)
     {
-        //passedTime += GetFrameTime();
         static float timer = 0.f;
         timer += GetFrameTime();
         if(timer > speed)
@@ -60,7 +59,6 @@ class Sprite
     }
     void Rotate(float speed, float degrees)
     {
-        //passedTime += GetFrameTime();
         static float timer = 0.f;
         timer += GetFrameTime();
         if(timer > speed)
