@@ -4,7 +4,7 @@
 
 class Sprite
 {
-    protected: //protected so I cam use them inside other classes
+    protected: //protected so I cam use them other classes
     Texture texture;
     Vector2 pixelSize;
     float passedTime;
@@ -57,15 +57,13 @@ class Sprite
             colIndex = (colIndex + 1) % colNum;
         }
     }
-    void Rotate(float speed, float degrees)
+    void Rotate(float speed) //will rotate 'speed' degrees per second
     {
-        static float timer = 0.f;
-        timer += GetFrameTime();
-        if(timer > speed)
-        {
-            timer -= speed;
-            rotation += degrees;
-            if(rotation >= 360) rotation -= 360.f;
-        }
+        float degrees = speed * GetFrameTime(); //degrees per second
+
+        rotation += degrees;
+
+        if(rotation >= 360.f)rotation -= 360.f;
+        if(rotation < 0.f)rotation += 360.f;
     }
 };

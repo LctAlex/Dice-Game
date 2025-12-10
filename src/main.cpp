@@ -9,6 +9,15 @@
 
 #include "sprite.hpp"
 
+enum Sides{D6, D8, D10, D12, D20};
+enum Amounts{OneD, TwoD, ThreeD, FiveD, TenD, FifteenD, TwentyD};
+enum Menus{/*fadeIn,*/ MainMenu, Options, Info, Game, Results};
+
+// void GenerateDice(Sides sides, Amounts amounts)
+// {
+
+// }
+
 int main()
 {
    // SetConfigFlags(FLAG_FULLSCREEN_MODE);
@@ -23,18 +32,24 @@ int main()
     AButton button2("assets/leaf.png", (Vector2){static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, {256, 256}, 1.0f);
     button2.setOriginLowerRight();
 
-    Sprite sprite("assets/dice6.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, .5f, {256, 256});
-    sprite.SetRow(1);
-
-    Dice dice("assets/dice6.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 1.0f, {256, 256}, {0.1f, 0.1f}, 0.15f, 0.15f, 0.5f, 6);
+    Dice dice("assets/dice6.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 0.25f, {256, 256}, {1.0f, 1.0f}, 0.5f, 0.15f, 0.15f, 6);
     dice.SetRow(1);
 
-    int chosenVal = -1;
-    float timer = 0.0f;
+    float rotationSpeed = 0.0f;
     while(!WindowShouldClose())
     {
         if(IsKeyPressed(KEY_ESCAPE)) break;
-        if(IsKeyPressed(KEY_ENTER)) {chosenVal = -1; timer = 0.0f; sprite.SetRow(1); dice.SetRow(1);}
+
+        if(IsKeyPressed(KEY_LEFT))
+        {
+            rotationSpeed -= 5.f;
+            std::cout << rotationSpeed << "\n";
+        }
+        if(IsKeyPressed(KEY_RIGHT))
+        {
+            rotationSpeed += 5.f;
+            std::cout << rotationSpeed << "\n";
+        }
 
         BeginDrawing();
         ClearBackground(WHITE);
@@ -48,35 +63,10 @@ int main()
 
         button2.Update();
         button2.Draw();
-        //DrawText("Bia", 300, 300, 20, RED);
-        if(chosenVal == -1)
-        {
-            timer += GetFrameTime();
 
-            if(timer > 2.f)
-            {
-                // sprite.SetRow(0);
-                // sprite.SetColumn(chosenVal);
-                // std::cout << chosenVal;
-                dice.SetRow(0);
-                chosenVal = GetRandomValue(0, 5);
-                dice.SetColumn(chosenVal);
-                std::cout << chosenVal;
-            }
-            else
-            {
-                // sprite.AnimateRow(0.05f, 6);
-                // sprite.Rotate(0.15f, 15);
-                // sprite.AnimateRow(0.05f, 6);
-                dice.Rotate(0.15f, 15);
-                dice.AnimateRow(0.05f, 6);
-            }
-        }
-        sprite.Draw();
+        dice.Rotate(rotationSpeed);
+        dice.Move();
         dice.Draw();
-
-        // DrawLine(0, GetScreenHeight()/2, GetScreenWidth(), GetScreenHeight()/2, BLUE);
-        // DrawLine(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), RED);
 
         EndMode2D();
 
