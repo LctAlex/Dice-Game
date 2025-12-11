@@ -1,0 +1,3 @@
+-Toate zarurile se opresc deodata
+
+-Coliziunea intre zaruri nu e buna deoarece fiecare zar se compara si cu el insusi

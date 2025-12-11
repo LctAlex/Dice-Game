@@ -3,6 +3,8 @@
 #include "rlgl.h"
 
 #include <iostream>
+#include <vector>
+
 #include "button.hpp"
 #include "animated_button.hpp"
 #include "dice.hpp"
@@ -13,42 +15,95 @@ enum Sides{D6, D8, D10, D12, D20};
 enum Amounts{OneD, TwoD, ThreeD, FiveD, TenD, FifteenD, TwentyD};
 enum Menus{/*fadeIn,*/ MainMenu, Options, Info, Game, Results};
 
-// void GenerateDice(Sides sides, Amounts amounts)
+// std::vector<Dice> GenerateDices(Sides sides, Amounts amounts)
 // {
+//     std::vector<Dice> dices;
+//     int diceSides = 0;
+//     int diceAmounts = 0;
+//     const char* imgPath = "";
+//     switch(sides)
+//     {
+//         case D6: diceSides = 6; imgPath = "assets/dice6.png"; break;
+//         case D8: diceSides = 8; imgPath = "assets/dice8.png"; break;
+//         case D10: diceSides = 10; imgPath = "assets/dice10.png"; break;
+//         case D12: diceSides = 12; imgPath = "assets/dice12.png";break;
+//         case D20: diceSides = 20; imgPath = "assets/dice20.png";break;
+//         default: diceSides = 6; imgPath = "assets/dice6.png"; break;
+//     }
 
+//     switch(amounts)
+//     {
+//         case OneD: diceAmounts = 1;
+//         case TwoD: diceAmounts = 2;
+//         case ThreeD: diceAmounts = 3;
+//         case FiveD: diceAmounts = 5;
+//         case TenD: diceAmounts = 10;
+//         case FifteenD: diceAmounts = 15;
+//         case TwentyD: diceAmounts = 20;
+//         default: diceAmounts = 1;
+//     }
+
+//     // for(int i = 0; i < diceAmounts; i++)
+//     // {
+//     //     dices[i] = Dice(imgPath,...,{256, 256}, HomemadeFunction(min, max) <- that takes random float values in intervals(included))
+//     // }
 // }
+
+//will delete:
+Vector2 RandomDirection() //I will do this one myself and I'll normalize myself
+{
+    Vector2 dir = {
+        (float)GetRandomValue(-100, 100),
+        (float)GetRandomValue(-100, 100)
+    };
+    float len = Vector2Length(dir);
+    if (len < 0.1f) return {1.0f, 0.0f}; // safety
+    return Vector2Scale(dir, 1.0f / len); // normalized
+}
 
 int main()
 {
-   // SetConfigFlags(FLAG_FULLSCREEN_MODE);
     InitWindow(1280, 720, "YES");
     SetTargetFPS(60);
     Camera2D camera2d = {};
     camera2d.zoom = 1.0f; //Crucial
     
     Texture2D background = LoadTexture("assets/menu.png");
-    //SetTextureFilter(background, TEXTURE_FILTER_BILINEAR);
 
+    //Animated button will be removed, I'm not using this anyway
     AButton button2("assets/leaf.png", (Vector2){static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, {256, 256}, 1.0f);
     button2.setOriginLowerRight();
 
-    Dice dice("assets/dice6.png", {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 0.25f, {256, 256}, {1.0f, 1.0f}, 0.5f, 0.15f, 0.15f, 6);
-    dice.SetRow(1);
+    Dice dice("assets/dice6.png", /*{0, 0}*/{(float)GetScreenWidth()/2, (float)GetScreenHeight()/2}, 0.25f, {256, 256},
+                                     {1.0f, 1.0f}, 1.0f, 90.f, 6);
 
-    float rotationSpeed = 0.0f;
+    std::vector<Dice> dices;
+    dices.reserve(20); //max dices: 20. We won't need to reallocate later
+    for(int i = 0; i < 20; i++)
+    {
+        //all will be random
+        Vector2 position = {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2};
+        float scale = 0.25f;
+        Vector2 direction = RandomDirection();
+        float velocity = 10.0f;
+        float rotation = 90.0f;
+        int sides = 6; //not random
+        const char* imgPath = "assets/dice6.png"; //not random
+        dices.emplace_back(imgPath, position, scale, (Vector2){256, 256}, direction, velocity, rotation, sides);
+    }
+    //to clear the vector:
+    //dices.clear();
+
     while(!WindowShouldClose())
     {
         if(IsKeyPressed(KEY_ESCAPE)) break;
 
-        if(IsKeyPressed(KEY_LEFT))
+        if(IsKeyPressed(KEY_ENTER))
         {
-            rotationSpeed -= 5.f;
-            std::cout << rotationSpeed << "\n";
-        }
-        if(IsKeyPressed(KEY_RIGHT))
-        {
-            rotationSpeed += 5.f;
-            std::cout << rotationSpeed << "\n";
+            for(auto& dice: dices)
+            {
+                dice.SetDefaultValues();
+            }
         }
 
         BeginDrawing();
@@ -64,9 +119,14 @@ int main()
         button2.Update();
         button2.Draw();
 
-        dice.Rotate(rotationSpeed);
-        dice.Move();
-        dice.Draw();
+        // dice.Update();
+        // dice.Draw();
+
+        for(auto& dice: dices)
+        {
+            dice.Update();
+            dice.Draw();
+        }
 
         EndMode2D();
 
