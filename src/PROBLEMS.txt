@@ -1,3 +1,7 @@
--Toate zarurile se opresc deodata
+-OLD:Toate zarurile se opresc deodata : CHECKED
 
--Coliziunea intre zaruri nu e buna deoarece fiecare zar se compara si cu el insusi
+-OLD:Coliziunea intre zaruri nu e buna deoarece fiecare zar se compara si cu el insusi : CHECKED
+
+-OLD: elasticity bouncing: in loc sa inmultesti directia cu -1, schimbi directiile intre cuburi : CHECKED
+
+-NEW:Zarurile intra unul in altul cand se lovesc, voi adauga variabila bool isColliding in classa Dice, si voi schimba directia DOAR daca !isColliding

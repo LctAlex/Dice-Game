@@ -15,6 +15,8 @@ enum Sides{D6, D8, D10, D12, D20};
 enum Amounts{OneD, TwoD, ThreeD, FiveD, TenD, FifteenD, TwentyD};
 enum Menus{/*fadeIn,*/ MainMenu, Options, Info, Game, Results};
 
+//functions I should put in separate files:
+
 // std::vector<Dice> GenerateDices(Sides sides, Amounts amounts)
 // {
 //     std::vector<Dice> dices;
@@ -49,7 +51,17 @@ enum Menus{/*fadeIn,*/ MainMenu, Options, Info, Game, Results};
 //     // }
 // }
 
+//GENERATE SEPARATELY
+// for each new dice:
+//     pos = random
+//     for each other dice:
+//         if collision -> pos.x += some amount
+
 //will delete:
+float GetSign (float number)
+{
+    return (number == 0) ? 0 : number / fabs(number); //get the sign of a number
+}
 Vector2 RandomDirection() //I will do this one myself and I'll normalize myself
 {
     Vector2 dir = {
@@ -57,8 +69,74 @@ Vector2 RandomDirection() //I will do this one myself and I'll normalize myself
         (float)GetRandomValue(-100, 100)
     };
     float len = Vector2Length(dir);
-    if (len < 0.1f) return {1.0f, 0.0f}; // safety
+    if (len < 0.1f) return {1.0f, 0.1f}; // safety
     return Vector2Scale(dir, 1.0f / len); // normalized
+}
+
+void CheckDiceCollisions(std::vector<Dice>& dices) // this comes after ALL individual updates (after for(auto& dice: dices){dice.Update()})
+{
+    for(int i = 0; i < (int)dices.size(); i++)
+    {
+        for(int j = i + 1; j < (int)dices.size(); j++) //j = i + 1 ensures NO DUPLICATE calculations
+        {
+            Dice& A = dices[i]; //simply a rename for dice[i]
+            Dice& B = dices[j];
+            float aIsColliding = false;
+            float bIsColliding = false;
+
+            if(CheckCollisionRecs(A.GetHitbox(), B.GetHitbox()))
+            {
+                float left = fmaxf(A.GetHitbox().x, B.GetHitbox().x);
+                float right = fminf(A.GetHitbox().x + A.GetHitbox().width, B.GetHitbox().x + B.GetHitbox().width);
+                float top = fmaxf(A.GetHitbox().y, B.GetHitbox().y);
+                float bottom = fminf(A.GetHitbox(). y + A.GetHitbox().height, B.GetHitbox(). y + B.GetHitbox().height);
+
+                float overlapX = right - left;
+                float overlapY = bottom - top;
+                //we'll use elasticity (swap direction values between dices)
+                if(overlapX > overlapY) 
+                {
+                    int offset = overlapY * 2;
+                    float aDirY = A.GetDirection().y;
+                    float bDirY = B.GetDirection().y;
+                    if(!aIsColliding) A.SetDirection({A.GetDirection().x, bDirY});
+                    A.AddPosition({0,GetSign(bDirY) * offset});
+                    if(!bIsColliding) B.SetDirection({B.GetDirection().x, aDirY});
+                    B.AddPosition({0,GetSign(aDirY) * offset});
+
+                    // A.ChangeDirection({1, -1});
+                    // A.AddPosition({0,A.GetDirection().y/abs(A.GetDirection().y) * offset});
+                    // B.ChangeDirection({1, -1});
+                    // B.AddPosition({0, B.GetDirection().y/abs(B.GetDirection().y) * offset});
+
+                    // A.ChangeDirection({1, -1});
+                    // A.AddPosition({0,A.GetDirection().y * offset});
+                    // B.ChangeDirection({1, -1});
+                    // B.AddPosition({0, B.GetDirection().y * offset});             
+                }
+                else 
+                {
+                    int offset = overlapX * 2;
+                    float aDirX = A.GetDirection().x;
+                    float bDirX = B.GetDirection().x;
+                    if(!aIsColliding) A.SetDirection({bDirX, A.GetDirection().y});
+                    B.AddPosition({GetSign(aDirX) * offset, 0});
+                    if(!bIsColliding) B.SetDirection({aDirX, B.GetDirection().y});
+                    A.AddPosition({GetSign(bDirX) * offset, 0}); 
+                    
+                    // A.ChangeDirection({-1, 1});
+                    // A.AddPosition({A.GetDirection().x/fabs(A.GetDirection().x) * offset, 0});
+                    // B.ChangeDirection({-1, 1});
+                    // B.AddPosition({B.GetDirection().x/fabs(B.GetDirection().x) * offset, 0});
+
+                    // A.ChangeDirection({-1, 1});
+                    // A.AddPosition({GetSign(B.GetDirection().x) * offset, 0});
+                    // B.ChangeDirection({-1, 1});
+                    // B.AddPosition({GetSign(A.GetDirection().x) * offset, 0});
+                }
+            }
+        }
+    }
 }
 
 int main()
@@ -91,6 +169,7 @@ int main()
         const char* imgPath = "assets/dice6.png"; //not random
         dices.emplace_back(imgPath, position, scale, (Vector2){256, 256}, direction, velocity, rotation, sides);
     }
+
     //to clear the vector:
     //dices.clear();
 
@@ -127,6 +206,7 @@ int main()
             dice.Update();
             dice.Draw();
         }
+        if(dices.size() <= 20) CheckDiceCollisions(dices);
 
         EndMode2D();
 

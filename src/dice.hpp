@@ -7,7 +7,7 @@
 //By design, ALL dice sprites will have 6 images for the rolling animation
 class Dice : public Sprite
 {
-    Vector2 direction; //float?
+    Vector2 direction;
     float velocity;
     float animSpeed;
     float rotationSpeed;
@@ -29,9 +29,9 @@ class Dice : public Sprite
         //limits for each parameter (to generate):
 
         //pos = [hitbox.width, hitbox.height <=> GetScreenWidth - hitbox.width, GetScreenHeight - hitbox.height] //random TOO
-        //scl = [1.0f <=> 1.f / num of dices] //NOT random
-        //pixels = always 256 x 256
-        //dir = (-)[0.0f?0.1f; 0.5f; 1.0f] 
+        ////scl = [1.0f <=> 1.f / num of dices] //NOT random
+        ////pixels = always 256 x 256
+        //dir = (-)[0.1f, 1.0f] //should use normalization
         //velo = [4.0f , 5.0f] //stops at <=0.3f (0.25f for better accuracy)
             //velo decrements at 0.25f => 15->19 TOTAL ITERATIONS
         //animSp = 0.05f //NOT random, FOR THAT: animSp will NOT be a parameter in the constructor
@@ -74,36 +74,61 @@ class Dice : public Sprite
         DrawRectangleLinesEx(hitbox, 2.5f, RED);
     }
 
-    void CheckCollisions(/*std::vector<Dice>& dices*/) //costy, checks every iteration...
+    //to check dice-collisions OUTSIDE (in the main.cpp file):
+    Rectangle GetHitbox()
     {
-        //vvv THIS RIGHT HERE: I should make another function to check dice-to-dice collisions, and MAKE SURE a dice isn't checked with itself
-        // if(dices.size() > 1)
-        // {
-        //     for (auto& dice : dices)
-        //     {
-        //         if(!isRolling || !dice.isRolling) return; //dice stopped
-        //         if(CheckCollisionRecs(hitbox, dice.hitbox))
-        //         {
-        //             float left   = fmaxf(hitbox.x, dice.hitbox.x);
-        //             float right  = fminf(hitbox.x + hitbox.width, dice.hitbox.x + dice.hitbox.width);
-        //             float top    = fmaxf(hitbox.y, dice.hitbox.y);
-        //             float bottom = fminf(hitbox.y + hitbox.height, dice.hitbox.y + dice.hitbox.height);
-        //             float overlapX = right - left;
-        //             float overlapY = bottom - top;
+        return hitbox;
+    }
+    void ChangeDirection(Vector2 multDir) // will take a vector {1 , 1} and (-1) for the axis that gets changed
+    {
+        direction = Vector2Multiply(direction, multDir);
+    }
+    void AddPosition(Vector2 addPos)
+    {
+        position = Vector2Add(position, addPos);
+    }
+    Vector2 GetDirection()
+    {
+        return direction;
+    }
+    
+    void SetDirection(Vector2 vec)
+    {
+        direction = vec;
+    }
 
-        //             if(overlapX > overlapY) 
-        //             {
-        //                 direction.y = -direction.y;
-        //                 dice.direction.y = -dice.direction.y;
-        //             }
-        //             else
-        //             {
-        //                 direction.x = -direction.x;
-        //                 dice.direction.x = -dice.direction.x;
-        //             }
-        //         }
-        //     }
-        // }
+    //possible dice-to-dice collision checking (inside class):
+    // void Dice::CheckDiceCollisions(std::vector<Dice>& dices)
+    // {
+    //     for (Dice& dice : dices)
+    //     {
+    //         if (&dice == this) continue; // skip self
+    //         if(this < &dice) continue; //no double checking
+
+    //         if (CheckCollisionRecs(hitbox, dice.hitbox))
+    //         {
+    //             float left   = fmaxf(hitbox.x, dice.hitbox.x);
+    //             float right  = fminf(hitbox.x + hitbox.width, dice.hitbox.x + dice.hitbox.width);
+    //             float top    = fmaxf(hitbox.y, dice.hitbox.y);
+    //             float bottom = fminf(hitbox.y + hitbox.height, dice.hitbox.y + dice.hitbox.height);
+    //             float overlapX = right - left;
+    //             float overlapY = bottom - top;
+    //             if(overlapX > overlapY)
+    //             {
+    //                 direction.y *= -1;
+    //                 dice.direction.y *= -1;
+    //             }
+    //             else 
+    //             {
+    //                 direction.x *= -1;
+    //                 dice.direction.x *= -1;   
+    //             }
+    //         }
+    //     }
+    // }
+
+    void CheckWallCollisions()
+    {
         //checking collision with the screen
         if(hitbox.x < 0)
         {
@@ -147,7 +172,7 @@ class Dice : public Sprite
             updateTimer -= 0.25f;
             velocity -= 0.25f;
             //std::cout << velocity << "\n";
-            animSpeed += (animSpeed < 0.15f)? 0.01f : 0.0f; // I should base this off velocity
+            animSpeed = (animSpeed < 0.15f)? animSpeed + 0.01f : animSpeed; // I should base this off velocity
             //std::cout << animSpeed << "\n";
             rotationSpeed = (rotationSpeed >= 10.f)? rotationSpeed - 5.0f : rotationSpeed;
         }
@@ -171,14 +196,14 @@ class Dice : public Sprite
             Animate();
             Rotate(rotationSpeed);
             //CheckHitbox();
-            CheckCollisions();
+            CheckWallCollisions();
         }
     }
 
     void SetDefaultValues() //for debugging
     {
         isRolling = true;
-        velocity = 5.0f; //4.0f slowest speed, 5.0f fastest speed (initial)
+        velocity = (float)GetRandomValue(4.f, 5.f); //4.0f slowest speed, 5.0f fastest speed (initial)
         animSpeed = 0.05f; //0.05f slowest speed, 0.01f fastest speed (initial)
         rotationSpeed = 120.f;
         SetRow(1);
