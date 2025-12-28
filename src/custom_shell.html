@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>My Raylib Game</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+
+      image-rendering: pixelated;
+      background-image: url("https://imgs.search.brave.com/xHQGyS-IDDGcAEXJllTPJ0uaXQA-Z5Y-_jBG8OBHefw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9kaWNl/LXJvbGwtc3RvY2st/bWFya2V0LXBhZ2Ut/Ymx1cnJlZC1iYWNr/Z3JvdW5kLXNob3dj/YXNpbmctZmluYW5j/aWFsLXRyZW5kcy1j/b25jZXB0LWludmVz/dG1lbnQtZGVjaXNp/b25zLXJpc2stZXZh/bHVhdGlvbi0zOTAx/NDU5MzUuanBn");
+      background-size: cover;        /* fill screen */
+      background-position: center;   /* center image */
+      background-repeat: no-repeat;
+    }
+
+    canvas {
+      width: 800px;
+      height: 800px;
+      aspect-ratio: 16/9;
+      display: block;
+      margin: auto;
+      background: black;
+      
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    var Module = {
+      canvas: (function() {
+        return document.getElementById("canvas");
+      })()
+    };
+  </script>
+
+  {{{ SCRIPT }}}
+</body>
+</html>

@@ -75,14 +75,17 @@ Vector2 RandomDirection() //I will do this one myself and I'll normalize myself
 
 void CheckDiceCollisions(std::vector<Dice>& dices) // this comes after ALL individual updates (after for(auto& dice: dices){dice.Update()})
 {
+    for(auto& dice : dices)
+    {
+        dice.SetCollision(false); //isColliding is set for all dices to false at the start
+    }
+
     for(int i = 0; i < (int)dices.size(); i++)
     {
         for(int j = i + 1; j < (int)dices.size(); j++) //j = i + 1 ensures NO DUPLICATE calculations
         {
             Dice& A = dices[i]; //simply a rename for dice[i]
             Dice& B = dices[j];
-            float aIsColliding = false;
-            float bIsColliding = false;
 
             if(CheckCollisionRecs(A.GetHitbox(), B.GetHitbox()))
             {
@@ -94,46 +97,54 @@ void CheckDiceCollisions(std::vector<Dice>& dices) // this comes after ALL indiv
                 float overlapX = right - left;
                 float overlapY = bottom - top;
                 //we'll use elasticity (swap direction values between dices)
-                if(overlapX > overlapY) 
+                Vector2 aDir = A.GetDirection();
+                Vector2 bDir = B.GetDirection();
+
+                //in this part we handle the directions of the dices (changed only once when collided)
+                if(overlapX > overlapY) //vertical collision
                 {
-                    int offset = overlapY * 2;
-                    float aDirY = A.GetDirection().y;
-                    float bDirY = B.GetDirection().y;
-                    if(!aIsColliding) A.SetDirection({A.GetDirection().x, bDirY});
-                    A.AddPosition({0,GetSign(bDirY) * offset});
-                    if(!bIsColliding) B.SetDirection({B.GetDirection().x, aDirY});
-                    B.AddPosition({0,GetSign(aDirY) * offset});
-
-                    // A.ChangeDirection({1, -1});
-                    // A.AddPosition({0,A.GetDirection().y/abs(A.GetDirection().y) * offset});
-                    // B.ChangeDirection({1, -1});
-                    // B.AddPosition({0, B.GetDirection().y/abs(B.GetDirection().y) * offset});
-
-                    // A.ChangeDirection({1, -1});
-                    // A.AddPosition({0,A.GetDirection().y * offset});
-                    // B.ChangeDirection({1, -1});
-                    // B.AddPosition({0, B.GetDirection().y * offset});             
+                    if(!A.GetCollision()) A.SetDirection({aDir.x, bDir.y});
+                    if(!B.GetCollision()) B.SetDirection({bDir.x, aDir.y});
                 }
                 else 
                 {
-                    int offset = overlapX * 2;
-                    float aDirX = A.GetDirection().x;
-                    float bDirX = B.GetDirection().x;
-                    if(!aIsColliding) A.SetDirection({bDirX, A.GetDirection().y});
-                    B.AddPosition({GetSign(aDirX) * offset, 0});
-                    if(!bIsColliding) B.SetDirection({aDirX, B.GetDirection().y});
-                    A.AddPosition({GetSign(bDirX) * offset, 0}); 
-                    
-                    // A.ChangeDirection({-1, 1});
-                    // A.AddPosition({A.GetDirection().x/fabs(A.GetDirection().x) * offset, 0});
-                    // B.ChangeDirection({-1, 1});
-                    // B.AddPosition({B.GetDirection().x/fabs(B.GetDirection().x) * offset, 0});
-
-                    // A.ChangeDirection({-1, 1});
-                    // A.AddPosition({GetSign(B.GetDirection().x) * offset, 0});
-                    // B.ChangeDirection({-1, 1});
-                    // B.AddPosition({GetSign(A.GetDirection().x) * offset, 0});
+                    if(!A.GetCollision()) A.SetDirection({bDir.x, aDir.y});
+                    if(!B.GetCollision()) B.SetDirection({aDir.x, bDir.y});
                 }
+
+                //in this section we'll handle the separation of the dices
+                if(overlapX > overlapY)//vertical collision
+                {
+                    //check which is above
+                    if(A.GetHitbox().y < B.GetHitbox().y) //'if A is above'
+                    {
+                        A.AddPosition({0, -overlapY/2}); // move A up
+                        B.AddPosition({0, overlapY/2}); // move B down
+                    }
+                    else
+                    {
+                        A.AddPosition({0, overlapY/2}); 
+                        B.AddPosition({0, -overlapY/2}); 
+                    }
+                }
+                else
+                {
+                    if(A.GetHitbox().x < B.GetHitbox().x) //'if A is on left'
+                    {
+                        A.AddPosition({-overlapX/2,0});
+                        B.AddPosition({overlapX, 0});
+                    }
+                    else
+                    {
+                        A.AddPosition({overlapX, 0});
+                        B.AddPosition({-overlapX/2,0});
+                
+                    }
+                }           
+                A.UpdateHitbox();
+                B.UpdateHitbox();
+                A.SetCollision(true);
+                B.SetCollision(true);
             }
         }
     }
@@ -206,8 +217,9 @@ int main()
             dice.Update();
             dice.Draw();
         }
-        if(dices.size() <= 20) CheckDiceCollisions(dices);
+        if(dices.size() <= 20)CheckDiceCollisions(dices);
 
+        DrawFPS(25, 25);
         EndMode2D();
 
         EndDrawing();
@@ -218,4 +230,3 @@ int main()
 
     return 0;
 }
-
